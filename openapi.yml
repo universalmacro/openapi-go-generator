@@ -1,0 +1,640 @@
+openapi: 3.0.3
+info:
+  title: Core APIs
+  description: |-
+    universalmacro
+  contact:
+    email: chenyunda218@gmail.com
+  version: 0.0.5
+servers:
+  - url: https://uat.api.universalmacro.com/core
+  - url: https://api.universalmacro.com/core
+tags:
+  - name: Admin
+  - name: Session
+  - name: Node
+  - name: Merchant
+paths:
+  /admins:
+    post:
+      tags: [Admin]
+      description: Create user account
+      operationId: CreateAdmin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAdminRequest'
+      responses:
+        '201':
+          description: 'Admin created'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+    get:
+      tags: [Admin]
+      description: List Admins
+      operationId: ListAdmin
+      parameters:
+        - $ref: '#/components/parameters/IndexParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: 'List Admin'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminList'
+  /admins/{id}:
+    get:
+      tags: [Admin]
+      description: Get admin info by id
+      parameters:
+        - $ref: '#/components/parameters/ID'
+      operationId: GetAdmin
+      responses:
+        '200':
+          description: 'Get Self info'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+    delete:
+      tags:
+        - Admin
+      parameters:
+        - $ref: '#/components/parameters/ID'
+      operationId: DeleteAdmin
+      responses:
+        '204':
+          description: 'Get Self info'
+  /admins/{id}/password:
+    put:
+      tags: [Admin]
+      description: Update admin password
+      parameters:
+        - $ref: '#/components/parameters/ID'
+      operationId: UpdateAdminPassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePasswordRequest'
+      responses:
+        '200':
+          description: 'Update password success'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+  /admins/self:
+    get:
+      tags: [Admin]
+      description: Get admin self info
+      operationId: GetAdminSelf
+      responses:
+        '200':
+          description: 'Get Self info'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+  /admins/self/password:
+    put:
+      tags: [Admin]
+      description: Update admin self password
+      operationId: UpdateAdminSelfPassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePasswordRequest'
+      responses:
+        '204':
+          description: 'Update password success'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+  /sessions:
+    post:
+      tags: [Session]
+      description: Create Login session
+      operationId: CreateSession
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSessionRequest'
+      responses:
+        '201':
+          description: 'Session created'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+  /nodes:
+    post:
+      tags: [Node]
+      description: Create node
+      operationId: CreateNode
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNodeRequest'
+      responses:
+        '201':
+          description: 'Node created'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Node'
+    get:
+      tags: [Node]
+      description: List Nodes
+      operationId: ListNode
+      parameters:
+        - $ref: '#/components/parameters/IndexParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: 'List Node'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeList'
+  /nodes/{id}:
+    get:
+      tags: [Node]
+      description: Get node info by id
+      parameters:
+        - $ref: '#/components/parameters/ID'
+      operationId: GetNode
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: 'Get Node info'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Node'
+    delete:
+      tags:
+        - Node
+      parameters:
+        - $ref: '#/components/parameters/ID'
+      operationId: DeleteNode
+      responses:
+        '204':
+          description: 'Get Self info'
+  /nodes/{id}/config:
+    get:
+      tags: [Node]
+      description: Get node info by id
+      parameters:
+        - $ref: '#/components/parameters/ID'
+      operationId: GetNodeConfig
+      security:
+        - BearerAuth: []
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: 'Get Node info'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeConfig'
+        '204':
+          description: 'Not set yet'
+    patch:
+      tags: [Node]
+      description: Get node info by id
+      parameters:
+        - $ref: '#/components/parameters/ID'
+      operationId: UpdateNodeConfig
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NodeConfig'
+      responses:
+        '200':
+          description: 'Get Node info'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeConfig'
+  /nodes/{id}/config/redis:
+    get:
+      tags: [Node]
+      description: Get node info by id
+      parameters:
+        - $ref: '#/components/parameters/ID'
+      operationId: GetNodeRedisConfig
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: 'Get Node info'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RedisConfig'
+        '204':
+          description: 'Not set yet'
+    put:
+      tags: [Node]
+      description: Get node info by id
+      parameters:
+        - $ref: '#/components/parameters/ID'
+      operationId: UpdateNodeRedisConfig
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RedisConfig'
+      responses:
+        '200':
+          description: 'Get Node info'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RedisConfig'
+  /nodes/{id}/config/database:
+    get:
+      tags: [Node]
+      description: Get node info by id
+      parameters:
+        - $ref: '#/components/parameters/ID'
+      operationId: GetNodeDatabaseConfig
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: 'Get Node info'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DBConfig'
+        '204':
+          description: 'Not set yet'
+    put:
+      tags: [Node]
+      description: Get node info by id
+      parameters:
+        - $ref: '#/components/parameters/ID'
+      operationId: UpdateNodeDatabaseConfig
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DBConfig'
+      responses:
+        '200':
+          description: 'Get Node info'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DBConfig'
+  /nodes/{id}/merchants:
+    get:
+      tags: [Merchant]
+      description: List merchants
+      operationId: ListNodeMerchants
+      parameters:
+        - $ref: '#/components/parameters/IndexParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: 'List Merchant of node'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MerchantList'
+    post:
+      tags: [Merchant]
+      description: Add merchant to node
+      operationId: AddMerchantToNode
+      parameters:
+        - $ref: '#/components/parameters/ID'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMerchantRequest'
+      responses:
+        '200':
+          description: 'Add Merchant to node'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Merchant'
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: ApiKey
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    CreateNodeRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+    NodeList:
+      type: object
+      required:
+        - items
+        - pagination
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Node'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    Node:
+      type: object
+      required:
+        - id
+        - name
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        securityKey:
+          type: string
+        description:
+          type: string
+        createdAt:
+          type: integer
+          format: int64
+        updatedAt:
+          type: integer
+          format: int64
+    NodeConfig:
+      type: object
+      properties:
+        api:
+          $ref: '#/components/schemas/ApiConfig'
+        server:
+          $ref: '#/components/schemas/ServerConfig'
+        database:
+          $ref: '#/components/schemas/DBConfig'
+        redis:
+          $ref: '#/components/schemas/RedisConfig'
+    RedisConfig:
+      type: object
+      properties:
+        host:
+          type: string
+        port:
+          type: string
+        password:
+          type: string
+    ApiConfig:
+      type: object
+      properties:
+        merchantUrl:
+          type: string
+    ServerConfig:
+      type: object
+      properties:
+        port:
+          type: string
+        jwtSecret:
+          type: string
+    TencentCloudConfig:
+      type: object
+      properties:
+        secretId:
+          type: string
+        secretKey:
+          type: string
+    DBConfig:
+      type: object
+      required:
+        - host
+        - port
+        - username
+        - password
+        - database
+      properties:
+        host:
+          type: string
+        port:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+        database:
+          type: string
+        type:
+          $ref: '#/components/schemas/DatabaseType'
+    DatabaseType:
+      type: string
+      enum: [MYSQL, POSTGRES]
+    PhoneNumber:
+      type: object
+      required:
+        - countryCode
+        - number
+      properties:
+        countryCode:
+          type: string
+        number:
+          type: string
+    Admin:
+      type: object
+      required:
+        - id
+        - account
+      properties:
+        id:
+          type: string
+        account:
+          type: string
+        phoneNumber:
+          $ref: '#/components/schemas/PhoneNumber'
+        role:
+          $ref: '#/components/schemas/Role'
+        createdAt:
+          type: integer
+          format: int64
+    AdminList:
+      description: 'Account list'
+      type: object
+      required:
+        - items
+        - pagination
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Admin'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    CreateSessionRequest:
+      description: 'Login request'
+      type: object
+      properties:
+        account:
+          type: string
+        password:
+          type: string
+    CreateAdminRequest:
+      description: 'Create admin request schema'
+      required:
+        - account
+        - password
+      type: object
+      properties:
+        account:
+          type: string
+        password:
+          type: string
+        role:
+          $ref: '#/components/schemas/Role'
+    Role:
+      type: string
+      enum: [ROOT, ADMIN]
+    UpdatePasswordRequest:
+      type: object
+      required:
+        - password
+      properties:
+        password:
+          type: string
+        oldPassword:
+          type: string
+    Session:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+    Ordering:
+      description: 'Ordering'
+      type: string
+      enum: [ASCENDING, DESCENDING]
+    Pagination:
+      description: 'Pagination'
+      type: object
+      required:
+        - index
+        - limit
+        - total
+      properties:
+        index:
+          type: integer
+          format: int64
+          description: 'Current page'
+        limit:
+          type: integer
+          format: int64
+          description: 'Amount per page'
+        total:
+          type: integer
+          format: int64
+          description: 'Total page'
+    CreateMerchantRequest:
+      type: object
+      required:
+        - account
+        - password
+      properties:
+        account:
+          type: string
+        password:
+          type: string
+    Merchant:
+      type: object
+      required:
+        - id
+        - nodeId
+        - account
+        - name
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+        nodeId:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        createdAt:
+          type: integer
+          format: int64
+        updatedAt:
+          type: integer
+          format: int64
+    MerchantList:
+      type: object
+      required:
+        - items
+        - pagination
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Merchant'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+  parameters:
+    Ordering:
+      name: ordering
+      description: 'ASCENDING or DESCENDING'
+      in: query
+      schema:
+        $ref: '#/components/schemas/Ordering'
+    IndexParam:
+      name: index
+      in: query
+      description: 'Current page index'
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+    LimitParam:
+      name: limit
+      in: query
+      description: 'Total pages'
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    ID:
+      in: path
+      name: id
+      schema:
+        type: string
+      required: true
+    StartAt:
+      in: query
+      name: startAt
+      schema:
+        type: integer
+        format: int64
+    EndAt:
+      in: query
+      name: endAt
+      schema:
+        type: integer
+        format: int64
