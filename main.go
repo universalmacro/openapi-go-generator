@@ -20,5 +20,6 @@ func main() {
 		panic(err)
 	}
 	fmt.Printf("%#v", api.File())
+	fmt.Printf("%#v", api)
 
 }

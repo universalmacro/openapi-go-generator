@@ -11,11 +11,52 @@ var (
 )
 
 type Openapi struct {
-	Components *Components `yaml:"components"`
+	Components *Components     `yaml:"components"`
+	Tags       []Tag           `yaml:"tags"`
+	Paths      map[string]Path `yaml:"paths"`
+}
+
+type Api struct {
+	Method map[string]HttpMethod `yaml:"method"`
+}
+
+type Path struct {
+	Get    *HttpMethod `yaml:"get"`
+	Post   *HttpMethod `yaml:"post"`
+	Put    *HttpMethod `yaml:"put"`
+	Delete *HttpMethod `yaml:"delete"`
+	Patch  *HttpMethod `yaml:"patch"`
+	Option *HttpMethod `yaml:"option"`
+}
+
+type HttpMethod struct {
+	Tags        []string `yaml:"tags"`
+	Description *string  `yaml:"description"`
+	OperationId *string  `yaml:"operationId"`
+}
+
+type RequestBody struct {
+	Content map[string]Content `yaml:"content"`
+}
+
+type Content struct {
+	ApplicationJson *ApplicationJson `yaml:"application/json"`
+	Description     *string          `yaml:"description"`
+}
+
+type ApplicationJson struct {
+	Schema *Schema `yaml:"schema"`
 }
 
 func (o Openapi) File() *jen.File {
 	f := jen.NewFile("models")
+	var apis map[string]Api = make(map[string]Api)
+	for _, tag := range o.Tags {
+		apis[tag.Name] = Api{}
+	}
+	// for uri, path := range o.Paths {
+
+	// }
 	if o.Components != nil {
 		if o.Components.Schemas != nil {
 			for name, schema := range o.Components.Schemas {
@@ -38,6 +79,10 @@ func (o Openapi) File() *jen.File {
 func (o Openapi) String() (s string) {
 	s = `Openapi{}`
 	return s
+}
+
+type Tag struct {
+	Name string `yaml:"name"`
 }
 
 type Components struct {
