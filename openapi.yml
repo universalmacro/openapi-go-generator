@@ -597,6 +597,20 @@ components:
             $ref: '#/components/schemas/Merchant'
         pagination:
           $ref: '#/components/schemas/Pagination'
+    TestObject:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        # roles:
+        #   type: array
+        #   items:
+        #     type: string
   parameters:
     Ordering:
       name: ordering

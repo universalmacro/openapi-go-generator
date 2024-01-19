@@ -1,7 +1,6 @@
 package openapi
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/dave/jennifer/jen"
@@ -22,6 +21,13 @@ func (o Openapi) File() *jen.File {
 			for name, schema := range o.Components.Schemas {
 				if schema.Statement() != nil {
 					f.Add(jen.Type().Id(name).Add(schema.Statement()))
+				}
+				// Enum
+				if schema.Type != nil && *schema.Type == "string" && schema.Enum != nil {
+					f.Add(jen.Type().Id(name).String())
+					for _, e := range *schema.Enum {
+						f.Add(jen.Const().Id(e)).Id(name).Op("=").Lit(e)
+					}
 				}
 			}
 		}
@@ -46,6 +52,7 @@ type Schema struct {
 	Default    *string            `yaml:"default"`
 	Required   *[]string          `yaml:"required"`
 	Enum       *[]string          `yaml:"enum"`
+	Items      *Schema            `yaml:"items"`
 }
 
 func (s Schema) Statement() *jen.Statement {
@@ -55,7 +62,7 @@ func (s Schema) Statement() *jen.Statement {
 		}
 		var fields []jen.Code
 		for name, schema := range *s.Properties {
-			fields = append(fields, generateField(schema, name))
+			fields = append(fields, generateField(schema, name, s.Required))
 		}
 		return jen.Struct(fields...)
 	}
@@ -78,21 +85,63 @@ func capitalize(str string) string {
 	return string(bs)
 }
 
-func generateField(schema Schema, name string) jen.Code {
+func generateField(schema Schema, name string, required *[]string) jen.Code {
 	var field jen.Code
-	fmt.Println(name)
-	fmt.Println(schema.Required)
 	if schema.Ref != nil {
-		var p = generateFieldName(name, schema.Required)
+		var p = generateFieldName(name, required)
 		field = p.Id(refToId(*schema.Ref))
 	} else if schema.Type != nil {
-		fieldName := generateFieldName(name, schema.Required)
+		fieldName := generateFieldName(name, required)
 		switch *schema.Type {
 		case "string":
 			return fieldName.String()
+		case "integer":
+			return generateIntgerField(fieldName, schema.Format)
+		case "number":
+			return generateFloatField(fieldName, schema.Format)
+		case "boolean":
+			return fieldName.Bool()
+		case "array":
+			return generateArrayField(fieldName, schema, name, required)
 		}
 	}
 	return field
+}
+
+func generateArrayField(fieldName *jen.Statement, schema Schema, name string, required *[]string) *jen.Statement {
+	fieldName.Index()
+	if schema.Items == nil {
+		panic("array without items")
+	} else {
+		if schema.Items.Ref != nil {
+			fieldName.Id(refToId(*schema.Items.Ref))
+		}
+	}
+	return fieldName
+}
+
+func generateIntgerField(fieldName *jen.Statement, format *string) *jen.Statement {
+	if format != nil {
+		if *format == "int32" {
+			fieldName.Int32()
+		}
+		fieldName.Int64()
+	} else {
+		fieldName.Int()
+	}
+	return fieldName
+}
+
+func generateFloatField(fieldName *jen.Statement, format *string) *jen.Statement {
+	if format != nil {
+		if *format == "float" {
+			fieldName.Float32()
+		}
+		fieldName.Float64()
+	} else {
+		fieldName.Float64()
+	}
+	return fieldName
 }
 
 func generateFieldName(name string, required *[]string) *jen.Statement {
@@ -113,11 +162,9 @@ func refToId(ref string) string {
 
 func isRequired(name string, required *[]string) bool {
 	if required == nil {
-		fmt.Println("is nul")
 		return false
 	}
 	for _, r := range *required {
-
 		if r == name {
 			return true
 		}
