@@ -4,16 +4,6 @@ import (
 	"github.com/dave/jennifer/jen"
 )
 
-type GStruct struct {
-	Id     string
-	Fields []Field
-}
-
-type Field struct {
-	Variable
-	Tags []string
-}
-
 type GFunc struct {
 	Id         string
 	Parameters Parameters
@@ -39,18 +29,25 @@ func (f GFunc) Statement() *jen.Statement {
 
 type Outputs []Variable
 
-func (ps Outputs) Apply(c *jen.Statement) *jen.Statement {
-	if len(ps) == 0 {
+func (outputs Outputs) Apply(c *jen.Statement) *jen.Statement {
+	if len(outputs) == 0 {
 		return c
 	}
-	if len(ps) == 1 {
-		if ps[0].Type.IsPointer {
+	if len(outputs) == 1 {
+		if outputs[0].Type.IsPointer {
 			c.Op("*")
 		}
-		return c.Id(ps[0].Type.Name)
+		return c.Id(outputs[0].Type.Id)
 	}
-	c.Params(
-		c.String(), c.String())
+	c.Op("(")
+	for _, o := range outputs {
+		if o.Type.IsPointer {
+			c.Op("*")
+		}
+		c.Id(o.Type.Id)
+		c.Op(",")
+	}
+	c.Op(")")
 	return c
 }
 
@@ -65,21 +62,21 @@ func (ps Parameters) Code() []jen.Code {
 }
 
 type Variable struct {
-	Name string
+	Id   string
 	Type Type
 	Init *string
 }
 
 func (v Variable) Parameter() jen.Code {
-	c := jen.Id(v.Name)
+	c := jen.Id(v.Id)
 	if v.Type.IsPointer {
 		c = c.Op("*")
 	}
-	c.Id(v.Type.Name)
+	c.Id(v.Type.Id)
 	return c
 }
 
 type Type struct {
-	Name      string
+	Id        string
 	IsPointer bool
 }

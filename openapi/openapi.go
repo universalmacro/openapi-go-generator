@@ -1,9 +1,11 @@
 package openapi
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/dave/jennifer/jen"
+	"github.com/universalmacro/openapigogenerator/gen"
 )
 
 var (
@@ -16,18 +18,7 @@ type Openapi struct {
 	Paths      map[string]Path `yaml:"paths"`
 }
 
-type Api struct {
-	Method map[string]HttpMethod `yaml:"method"`
-}
-
-type Path struct {
-	Get    *HttpMethod `yaml:"get"`
-	Post   *HttpMethod `yaml:"post"`
-	Put    *HttpMethod `yaml:"put"`
-	Delete *HttpMethod `yaml:"delete"`
-	Patch  *HttpMethod `yaml:"patch"`
-	Option *HttpMethod `yaml:"option"`
-}
+type Path map[string]HttpMethod
 
 type HttpMethod struct {
 	Tags        []string `yaml:"tags"`
@@ -50,13 +41,15 @@ type ApplicationJson struct {
 
 func (o Openapi) File() *jen.File {
 	f := jen.NewFile("models")
-	var apis map[string]Api = make(map[string]Api)
-	for _, tag := range o.Tags {
-		apis[tag.Name] = Api{}
-	}
-	// for uri, path := range o.Paths {
-
+	// var apis map[string]Api = make(map[string]Api)
+	// for _, tag := range o.Tags {
+	// 	apis[tag.Name] = Api{}
 	// }
+	for uri, path := range o.Paths {
+		for method, httpMethod := range path {
+			fmt.Println(method, uri, *httpMethod.OperationId)
+		}
+	}
 	if o.Components != nil {
 		if o.Components.Schemas != nil {
 			for name, schema := range o.Components.Schemas {
@@ -65,9 +58,9 @@ func (o Openapi) File() *jen.File {
 				}
 				// Enum
 				if schema.Type != nil && *schema.Type == "string" && schema.Enum != nil {
-					f.Add(jen.Type().Id(name).String())
-					for _, e := range *schema.Enum {
-						f.Add(jen.Const().Id(e)).Id(name).Op("=").Lit(e)
+					en := gen.StringEnum{Id: name, Values: *schema.Enum}.Statement()
+					for _, e := range en {
+						f.Add(e)
 					}
 				}
 			}
