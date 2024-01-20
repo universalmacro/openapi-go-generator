@@ -24,6 +24,7 @@ func (gs Method) Statement(structId string) *jen.Statement {
 	s.Id(structId)
 	s.Op(")")
 	s.Id(gs.Id).Params()
+	gs.Outputs.Apply(s)
 	var statements []jen.Code
 	for _, statement := range gs.Func.Statements {
 		statements = append(statements, statement)

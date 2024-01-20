@@ -40,11 +40,21 @@ type ApplicationJson struct {
 
 func (o Openapi) File(model string) *jen.File {
 	f := jen.NewFile(model)
-	// for uri, path := range o.Paths {
-	// 	for method, httpMethod := range path {
-	// 		fmt.Println(method, uri, *httpMethod.OperationId)
-	// 	}
-	// }
+	f.ImportName("github.com/gin-gonic/gin", "gin")
+	apis := make(map[string]gen.Interface, 0)
+	for _, path := range o.Paths {
+		for _, httpMethod := range path {
+			tag := httpMethod.Tags[0]
+			if _, ok := apis[tag]; !ok {
+				apiInterface := gen.Interface{Id: tag + "Api"}
+				apiInterface.AddMethods(gen.Method{Func: gen.Func{Id: *httpMethod.OperationId}})
+				apis[tag] = apiInterface
+			}
+		}
+	}
+	for _, api := range apis {
+		f.Add(api.Statement())
+	}
 	if o.Components != nil {
 		if o.Components.Schemas != nil {
 			for id, schema := range o.Components.Schemas {
