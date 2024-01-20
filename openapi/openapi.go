@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/dave/jennifer/jen"
-	"github.com/universalmacro/openapigogenerator/gen"
+	"github.com/universalmacro/openapi-go-generator/gen"
 )
 
 var (

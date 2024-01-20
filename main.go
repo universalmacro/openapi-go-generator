@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/universalmacro/openapigogenerator/openapi"
+	"github.com/universalmacro/openapi-go-generator/openapi"
 	"gopkg.in/yaml.v3"
 )
 
