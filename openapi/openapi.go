@@ -1,7 +1,6 @@
 package openapi
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/dave/jennifer/jen"
@@ -39,26 +38,22 @@ type ApplicationJson struct {
 	Schema *Schema `yaml:"schema"`
 }
 
-func (o Openapi) File() *jen.File {
-	f := jen.NewFile("models")
-	// var apis map[string]Api = make(map[string]Api)
-	// for _, tag := range o.Tags {
-	// 	apis[tag.Name] = Api{}
+func (o Openapi) File(model string) *jen.File {
+	f := jen.NewFile(model)
+	// for uri, path := range o.Paths {
+	// 	for method, httpMethod := range path {
+	// 		fmt.Println(method, uri, *httpMethod.OperationId)
+	// 	}
 	// }
-	for uri, path := range o.Paths {
-		for method, httpMethod := range path {
-			fmt.Println(method, uri, *httpMethod.OperationId)
-		}
-	}
 	if o.Components != nil {
 		if o.Components.Schemas != nil {
-			for name, schema := range o.Components.Schemas {
-				if schema.Statement() != nil {
-					f.Add(jen.Type().Id(name).Add(schema.Statement()))
+			for id, schema := range o.Components.Schemas {
+				if schema.Statement(id) != nil {
+					f.Add(schema.Statement(id))
 				}
 				// Enum
 				if schema.Type != nil && *schema.Type == "string" && schema.Enum != nil {
-					en := gen.StringEnum{Id: name, Values: *schema.Enum}.Statement()
+					en := gen.StringEnum{Id: id, Values: *schema.Enum}.Statement()
 					for _, e := range en {
 						f.Add(e)
 					}
@@ -93,16 +88,27 @@ type Schema struct {
 	Items      *Schema            `yaml:"items"`
 }
 
-func (s Schema) Statement() *jen.Statement {
+func (s Schema) Statement(id string) *jen.Statement {
 	if s.Type != nil && *s.Type == object {
 		if s.Properties == nil {
 			panic("object without properties")
 		}
-		var fields []jen.Code
-		for name, schema := range *s.Properties {
-			fields = append(fields, generateField(schema, name, s.Required))
+		st := gen.GStruct{Id: id}
+		for fieldId, _ := range *s.Properties {
+			tags := map[string]string{"json": fieldId, "xml": fieldId}
+			field := gen.Field{
+				Variable: gen.Variable{
+					Id: capitalize(fieldId),
+					Type: gen.Type{
+						Id:        "string",
+						IsPointer: !isRequired(fieldId, s.Required),
+					},
+				},
+				Tags: tags,
+			}
+			st.AddFields(field)
 		}
-		return jen.Struct(fields...)
+		return st.Statement()
 	}
 	return nil
 }
