@@ -1,4 +1,4 @@
-module github.com/universalmacro/openapigogenerator
+module github.com/universalmacro/openapi-go-generator
 
 go 1.21.1
 
