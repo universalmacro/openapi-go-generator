@@ -39,6 +39,7 @@ type ApplicationJson struct {
 }
 
 func (o Openapi) File(model string) *jen.File {
+	model = strings.ReplaceAll(model, "-", "")
 	f := jen.NewFile(model)
 	f.ImportName("github.com/gin-gonic/gin", "gin")
 	apis := make(map[string]gen.Interface, 0)
