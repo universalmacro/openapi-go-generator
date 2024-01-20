@@ -49,7 +49,9 @@ func (o Openapi) File(model string) *jen.File {
 		if o.Components.Schemas != nil {
 			for id, schema := range o.Components.Schemas {
 				if schema.Statement(id) != nil {
-					f.Add(schema.Statement(id))
+					for _, st := range schema.Statement(id) {
+						f.Add(st)
+					}
 				}
 				// Enum
 				if schema.Type != nil && *schema.Type == "string" && schema.Enum != nil {
@@ -88,12 +90,12 @@ type Schema struct {
 	Items      *Schema            `yaml:"items"`
 }
 
-func (s Schema) Statement(id string) *jen.Statement {
+func (s Schema) Statement(id string) []*jen.Statement {
 	if s.Type != nil && *s.Type == object {
 		if s.Properties == nil {
 			panic("object without properties")
 		}
-		st := gen.GStruct{Id: id}
+		st := gen.Struct{Id: id}
 		for fieldId, _ := range *s.Properties {
 			tags := map[string]string{"json": fieldId, "xml": fieldId}
 			field := gen.Field{

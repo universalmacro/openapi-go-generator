@@ -2,14 +2,14 @@ package gen
 
 import "github.com/dave/jennifer/jen"
 
-type GStruct struct {
+type Struct struct {
 	Id      string
 	Fields  []Field
 	Methods []Method
 }
 
 type Method struct {
-	Method    GFunc
+	Func
 	IsPointer bool
 	SelfId    string
 }
@@ -23,28 +23,37 @@ func (gs Method) Statement(structId string) *jen.Statement {
 	}
 	s.Id(structId)
 	s.Op(")")
-	s.Block()
+	s.Id(gs.Id).Params()
+	var statements []jen.Code
+	for _, statement := range gs.Func.Statements {
+		statements = append(statements, statement)
+	}
+	s.Block(statements...)
 	return s
 }
 
-func (gs *GStruct) AddFields(f ...Field) *GStruct {
+func (gs *Struct) AddFields(f ...Field) *Struct {
 	gs.Fields = append(gs.Fields, f...)
 	return gs
 }
 
-func (gs *GStruct) AddMethods(m ...Method) *GStruct {
+func (gs *Struct) AddMethods(m ...Method) *Struct {
 	gs.Methods = append(gs.Methods, m...)
 	return gs
 }
 
-func (gs GStruct) Statement() *jen.Statement {
+func (gs Struct) Statement() []*jen.Statement {
 	s := jen.Type().Id(gs.Id)
 	fields := make([]jen.Code, len(gs.Fields))
 	for _, f := range gs.Fields {
 		fields = append(fields, f.Code())
 	}
 	s.Struct(fields...)
-	return s
+	statements := []*jen.Statement{s}
+	for _, m := range gs.Methods {
+		statements = append(statements, m.Statement(gs.Id))
+	}
+	return statements
 }
 
 type Field struct {

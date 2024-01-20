@@ -4,23 +4,29 @@ import (
 	"github.com/dave/jennifer/jen"
 )
 
-type GFunc struct {
+type Func struct {
 	Id         string
 	Parameters Parameters
 	Outputs    Outputs
+	Statements []*jen.Statement
 }
 
-func (gf *GFunc) AddOutputs(p ...Variable) *GFunc {
+func (gf *Func) AddStatements(c ...*jen.Statement) *Func {
+	gf.Statements = append(gf.Statements, c...)
+	return gf
+}
+
+func (gf *Func) AddOutputs(p ...Variable) *Func {
 	gf.Outputs = append(gf.Outputs, p...)
 	return gf
 }
 
-func (gf *GFunc) AddParameters(p ...Variable) *GFunc {
+func (gf *Func) AddParameters(p ...Variable) *Func {
 	gf.Parameters = append(gf.Parameters, p...)
 	return gf
 }
 
-func (f GFunc) Statement() *jen.Statement {
+func (f Func) Statement() *jen.Statement {
 	s := jen.Func().Id(f.Id).Params(f.Parameters.Code()...)
 	f.Outputs.Apply(s)
 	s = s.Block()
