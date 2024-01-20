@@ -47,14 +47,6 @@ func (gs GStruct) Statement() *jen.Statement {
 	return s
 }
 
-// func (gs GStruct) MethodsStatement() []jen.Statement {
-// 	var methods []jen.Code
-// 	for _, m := range gs.Methods {
-// 		methods = append(methods, m.Method.Statement(gs.Id).Block())
-// 	}
-// 	return methods
-// }
-
 type Field struct {
 	Variable
 	Tags map[string]string
