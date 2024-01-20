@@ -126,13 +126,13 @@ func (s Schema) Statement(id string) []*jen.Statement {
 			panic("object without properties")
 		}
 		st := gen.Struct{Id: id}
-		for fieldId, _ := range *s.Properties {
+		for fieldId, schema := range *s.Properties {
 			tags := map[string]string{"json": fieldId, "xml": fieldId}
 			field := gen.Field{
 				Variable: gen.Variable{
 					Id: capitalize(fieldId),
 					Type: gen.Type{
-						Id:        "string",
+						Id:        typeString(schema),
 						IsPointer: !isRequired(fieldId, s.Required),
 					},
 				},
@@ -150,6 +150,42 @@ type Parameter struct {
 	In          *string `yaml:"in"`
 	Description *string `yaml:"description"`
 	Schema      *Schema `yaml:"schema"`
+}
+
+func typeString(s Schema) string {
+	if s.Type != nil {
+		switch *s.Type {
+		case "string":
+			return "string"
+		case "integer":
+			if s.Format != nil && *s.Format == "int64" {
+				return "int64"
+			}
+			return "int32"
+		case "boolean":
+			return "bool"
+		case "number":
+			if s.Format != nil && *s.Format == "double" {
+				return "float64"
+			}
+			return "float32"
+		case "array":
+			if s.Items == nil {
+				panic("array without items")
+			}
+			return "[]" + typeString(*s.Items)
+		}
+		return *s.Type
+	}
+	if s.Ref != nil {
+		return refToType(*s.Ref)
+	}
+	panic("type string")
+}
+
+func refToType(ref string) string {
+	s := strings.Split(ref, "/")
+	return s[len(s)-1]
 }
 
 func capitalize(str string) string {
