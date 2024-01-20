@@ -1,6 +1,7 @@
 package openapi
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/dave/jennifer/jen"
@@ -47,6 +48,7 @@ func (o Openapi) File(model string) *jen.File {
 		for method, httpMethod := range path {
 			tag := httpMethod.Tags[0]
 			if _, ok := bindingFuncs[tag]; !ok {
+				fmt.Println(tag)
 				params := gen.Parameters{gen.Variable{Id: "router", Type: gen.Type{
 					Id:        "gin.Engine",
 					IsPointer: true,
@@ -61,9 +63,11 @@ func (o Openapi) File(model string) *jen.File {
 			bindingFuncs[tag] = bindingFunc
 			if _, ok := apis[tag]; !ok {
 				apiInterface := gen.Interface{Id: tag + "Api"}
-				apiInterface.AddMethods(gen.Method{Func: gen.Func{Id: *httpMethod.OperationId}})
 				apis[tag] = apiInterface
 			}
+			apiInterface := apis[tag]
+			apiInterface.AddMethods(gen.Method{Func: gen.Func{Id: *httpMethod.OperationId}})
+			apis[tag] = apiInterface
 		}
 	}
 	for _, bindingFunc := range bindingFuncs {

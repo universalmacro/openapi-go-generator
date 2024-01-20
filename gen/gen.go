@@ -11,8 +11,8 @@ type Func struct {
 	Statements []*jen.Statement
 }
 
-func (gf *Func) AddStatements(c ...*jen.Statement) *Func {
-	gf.Statements = append(gf.Statements, c...)
+func (gf *Func) AddStatements(ss ...*jen.Statement) *Func {
+	gf.Statements = append(gf.Statements, ss...)
 	return gf
 }
 
