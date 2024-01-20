@@ -15,7 +15,7 @@ func (i *Interface) AddMethods(m ...Method) *Interface {
 func (i Interface) Statement() *jen.Statement {
 	methods := make([]jen.Code, len(i.Methods))
 	for _, m := range i.Methods {
-		method := jen.Id(m.Id).Params(jen.Qual("github.com/gin-gonic/gin", "Context"))
+		method := jen.Id(m.Id).Params(jen.Id("ctx").Op("*").Qual("github.com/gin-gonic/gin", "Context"))
 		m.Outputs.Apply(method)
 		methods = append(methods, method)
 	}
