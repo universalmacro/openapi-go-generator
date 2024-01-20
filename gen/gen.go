@@ -29,7 +29,11 @@ func (gf *Func) AddParameters(p ...Variable) *Func {
 func (f Func) Statement() *jen.Statement {
 	s := jen.Func().Id(f.Id).Params(f.Parameters.Code()...)
 	f.Outputs.Apply(s)
-	s = s.Block()
+	var statements []jen.Code
+	for _, statement := range f.Statements {
+		statements = append(statements, statement)
+	}
+	s = s.Block(statements...)
 	return s
 }
 

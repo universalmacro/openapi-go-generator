@@ -42,15 +42,32 @@ func (o Openapi) File(model string) *jen.File {
 	f := jen.NewFile(model)
 	f.ImportName("github.com/gin-gonic/gin", "gin")
 	apis := make(map[string]gen.Interface, 0)
-	for _, path := range o.Paths {
-		for _, httpMethod := range path {
+	bindingFuncs := map[string]gen.Func{}
+	for uri, path := range o.Paths {
+		for method, httpMethod := range path {
 			tag := httpMethod.Tags[0]
+			if _, ok := bindingFuncs[tag]; !ok {
+				params := gen.Parameters{gen.Variable{Id: "router", Type: gen.Type{
+					Id:        "gin.Engine",
+					IsPointer: true,
+				}}, gen.Variable{Id: "api", Type: gen.Type{Id: tag + "Api"}}}
+				bindingFuncs[tag] = gen.Func{Id: tag + "ApiBinding", Parameters: params}
+			}
+			bindingFunc := bindingFuncs[tag]
+			bindingFunc.AddStatements(
+				jen.Id(
+					"router").Dot(
+					strings.ToUpper(method)).Params(jen.Lit(pathConvert(uri)), jen.Id("api").Dot(*httpMethod.OperationId)))
+			bindingFuncs[tag] = bindingFunc
 			if _, ok := apis[tag]; !ok {
 				apiInterface := gen.Interface{Id: tag + "Api"}
 				apiInterface.AddMethods(gen.Method{Func: gen.Func{Id: *httpMethod.OperationId}})
 				apis[tag] = apiInterface
 			}
 		}
+	}
+	for _, bindingFunc := range bindingFuncs {
+		f.Add(bindingFunc.Statement())
 	}
 	for _, api := range apis {
 		f.Add(api.Statement())
@@ -141,81 +158,6 @@ func capitalize(str string) string {
 	return string(bs)
 }
 
-func generateField(schema Schema, name string, required *[]string) jen.Code {
-	var field jen.Code
-	if schema.Ref != nil {
-		var p = generateFieldName(name, required)
-		field = p.Id(refToId(*schema.Ref))
-	} else if schema.Type != nil {
-		fieldName := generateFieldName(name, required)
-		switch *schema.Type {
-		case "string":
-			return fieldName.String()
-		case "integer":
-			return generateIntgerField(fieldName, schema.Format)
-		case "number":
-			return generateFloatField(fieldName, schema.Format)
-		case "boolean":
-			return fieldName.Bool()
-		case "array":
-			return generateArrayField(fieldName, schema, name, required)
-		}
-	}
-	return field
-}
-
-func generateArrayField(fieldName *jen.Statement, schema Schema, name string, required *[]string) *jen.Statement {
-	fieldName.Index()
-	if schema.Items == nil {
-		panic("array without items")
-	} else {
-		if schema.Items.Ref != nil {
-			fieldName.Id(refToId(*schema.Items.Ref))
-		}
-	}
-	return fieldName
-}
-
-func generateIntgerField(fieldName *jen.Statement, format *string) *jen.Statement {
-	if format != nil {
-		if *format == "int32" {
-			fieldName.Int32()
-		}
-		fieldName.Int64()
-	} else {
-		fieldName.Int()
-	}
-	return fieldName
-}
-
-func generateFloatField(fieldName *jen.Statement, format *string) *jen.Statement {
-	if format != nil {
-		if *format == "float" {
-			fieldName.Float32()
-		}
-		fieldName.Float64()
-	} else {
-		fieldName.Float64()
-	}
-	return fieldName
-}
-
-func generateFieldName(name string, required *[]string) *jen.Statement {
-	var fieldName *jen.Statement = jen.Id(capitalize(name))
-	if !isRequired(name, required) {
-		fieldName.Op("*")
-	}
-	return fieldName
-}
-
-func refToId(ref string) string {
-	s := strings.Split(ref, "/")
-	if len(s) == 0 {
-		panic("ref is empty")
-	}
-	return s[len(s)-1]
-}
-
 func isRequired(name string, required *[]string) bool {
 	if required == nil {
 		return false
@@ -226,4 +168,8 @@ func isRequired(name string, required *[]string) bool {
 		}
 	}
 	return false
+}
+
+func pathConvert(path string) string {
+	return strings.ReplaceAll(strings.ReplaceAll(path, "{", ":"), "}", "")
 }
