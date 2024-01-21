@@ -132,7 +132,7 @@ func (s Schema) Statement(id string) []*jen.Statement {
 				Variable: gen.Variable{
 					Id: capitalize(fieldId),
 					Type: gen.Type{
-						Id:        typeString(schema),
+						Id:        generateTypeString(schema),
 						IsPointer: !isRequired(fieldId, s.Required),
 					},
 				},
@@ -152,7 +152,7 @@ type Parameter struct {
 	Schema      *Schema `yaml:"schema"`
 }
 
-func typeString(s Schema) string {
+func generateTypeString(s Schema) string {
 	if s.Type != nil {
 		switch *s.Type {
 		case "string":
@@ -173,7 +173,7 @@ func typeString(s Schema) string {
 			if s.Items == nil {
 				panic("array without items")
 			}
-			return "[]" + typeString(*s.Items)
+			return "[]" + generateTypeString(*s.Items)
 		}
 		return *s.Type
 	}
