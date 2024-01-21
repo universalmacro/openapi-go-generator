@@ -43,8 +43,6 @@ func (o Openapi) File(model string) *jen.File {
 	model = strings.ToLower(model)
 	re := regexp.MustCompile("[^a-z0-9]")
 	model = re.ReplaceAllString(model, "")
-
-	model = strings.ReplaceAll(model, "-", "")
 	f := jen.NewFile(model)
 	f.ImportName("github.com/gin-gonic/gin", "gin")
 	apis := make(map[string]gen.Interface, 0)
