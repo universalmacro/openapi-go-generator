@@ -12,6 +12,7 @@ type Method struct {
 	Func
 	IsPointer bool
 	SelfId    string
+	Comment   *string
 }
 
 func (gs Method) Statement(structId string) *jen.Statement {

@@ -16,6 +16,9 @@ func (i Interface) Statement() *jen.Statement {
 	methods := make([]jen.Code, len(i.Methods))
 	for _, m := range i.Methods {
 		method := jen.Id(m.Id).Params(jen.Id("ctx").Op("*").Qual("github.com/gin-gonic/gin", "Context"))
+		if m.Comment != nil {
+			method.Comment(*m.Comment)
+		}
 		m.Outputs.Apply(method)
 		methods = append(methods, method)
 	}
