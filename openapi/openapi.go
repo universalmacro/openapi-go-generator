@@ -1,6 +1,7 @@
 package openapi
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 
@@ -49,6 +50,13 @@ func (o Openapi) File(model string) *jen.File {
 	bindingFuncs := map[string]gen.Func{}
 	for uri, path := range o.Paths {
 		for method, httpMethod := range path {
+			if httpMethod.OperationId == nil {
+				panic(method + " " + uri + "no operationId")
+			}
+			if len(httpMethod.Tags[0]) == 0 {
+				fmt.Println("warning: " + method + " " + uri + "no tag")
+				continue
+			}
 			tag := httpMethod.Tags[0]
 			if _, ok := bindingFuncs[tag]; !ok {
 				params := gen.Parameters{gen.Variable{Id: "router", Type: gen.Type{
