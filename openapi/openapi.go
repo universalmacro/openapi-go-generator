@@ -116,14 +116,22 @@ type Components struct {
 	Parameters map[string]Parameter `yaml:"parameters"`
 }
 type Schema struct {
-	Type       *string            `yaml:"type"`
-	Ref        *string            `yaml:"$ref"`
-	Properties *map[string]Schema `yaml:"properties"`
-	Format     *string            `yaml:"format"`
-	Default    *string            `yaml:"default"`
-	Required   *[]string          `yaml:"required"`
-	Enum       *[]string          `yaml:"enum"`
-	Items      *Schema            `yaml:"items"`
+	Type          *string            `yaml:"type"`
+	Ref           *string            `yaml:"$ref"`
+	Properties    *map[string]Schema `yaml:"properties"`
+	Format        *string            `yaml:"format"`
+	Default       *string            `yaml:"default"`
+	Required      *[]string          `yaml:"required"`
+	Enum          *[]string          `yaml:"enum"`
+	Items         *Schema            `yaml:"items"`
+	OneOf         *[]Schema          `yaml:"oneOf"`
+	AllOf         *[]Schema          `yaml:"allOf"`
+	AnyOf         *[]Schema          `yaml:"anyOf"`
+	Discriminator *Discriminator     `yaml:"discriminator"`
+}
+
+type Discriminator struct {
+	PropertyName string `yaml:"propertyName"`
 }
 
 func (s Schema) Statement(id string) []*jen.Statement {
