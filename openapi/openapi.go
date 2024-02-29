@@ -67,9 +67,10 @@ func (o Openapi) File(model string) *jen.File {
 			}
 			bindingFunc := bindingFuncs[tag]
 			bindingFunc.AddStatements(
-				jen.Id(
-					"router").Dot(
-					strings.ToUpper(method)).Params(jen.Lit(pathConvert(uri)), jen.Id("api").Dot(*httpMethod.OperationId)))
+				jen.
+					Id("router").
+					Dot(strings.ToUpper(method)).
+					Params(jen.Lit(pathConvert(uri)), jen.Id("api").Dot(*httpMethod.OperationId)))
 			bindingFuncs[tag] = bindingFunc
 			if _, ok := apis[tag]; !ok {
 				apiInterface := gen.Interface{Id: tag + "Api"}
@@ -115,6 +116,7 @@ type Components struct {
 	Schemas    map[string]Schema    `yaml:"schemas"`
 	Parameters map[string]Parameter `yaml:"parameters"`
 }
+
 type Schema struct {
 	Type          *string            `yaml:"type"`
 	Ref           *string            `yaml:"$ref"`
