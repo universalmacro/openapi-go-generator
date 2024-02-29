@@ -23,11 +23,42 @@ components:
         password:
           type: string
 ```
-Then will generate below code.
+Then will generate code below.
 ```go
 type CreateSessionRequest struct {
 	Password        *string `json:"password" xml:"password"`
 	ShortMerchantId *string `json:"shortMerchantId" xml:"shortMerchantId"`
 	Account         *string `json:"account" xml:"account"`
+}
+```
+About APIs definition.
+```yml
+paths:
+  /sessions:
+    post:
+      tags:
+        - Session
+      summary: "Create session"
+      operationId: CreateSession
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSessionRequest"
+      responses:
+        "201":
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+```
+Then the api interface and Binding function is generated. The prefix is depending on the first tags.
+```go
+type SessionApi interface {
+	CreateSession(ctx *gin.Context)
+}
+func SessionApiBinding(router *gin.Engine, api SessionApi) {
+	router.POST("/sessions", api.CreateSession)
 }
 ```
